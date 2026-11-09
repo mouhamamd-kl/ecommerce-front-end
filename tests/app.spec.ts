@@ -196,6 +196,23 @@ async function login(page: Page, admin = false) {
   await expect(page).toHaveURL(admin ? /\/admin$/ : /\/$/);
 }
 
+test('catalog revalidates on focus so an edited product replaces the old storefront data', async ({ page }) => {
+  await mockBackend(page);
+  let edited = false;
+  await page.route('**/api/v1/products', async route => {
+    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({
+      status: 'success', message: 'Products',
+      data: products.map(product => product.id === 1 && edited ? { ...product, name: 'Fresh Wireless Headphones' } : product),
+    }) });
+  });
+  await page.goto('/');
+  await expect(page.getByText('Wireless Headphones', { exact: true })).toBeVisible();
+  edited = true;
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(page.getByText('Fresh Wireless Headphones', { exact: true })).toBeVisible();
+  await expect(page.getByText('Wireless Headphones', { exact: true })).toHaveCount(0);
+});
+
 test('catalog filters, price sorting, and grid/list work on real response shapes', async ({
   page,
 }) => {

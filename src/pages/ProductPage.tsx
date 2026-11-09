@@ -19,9 +19,12 @@ export default function ProductPage() {
   const [photo, setPhoto] = useState<string>();
   const { add, busy } = useAddToCart();
   useEffect(() => {
-    void dispatch(loadProduct(Number(id)));
+    const refresh = () => { void dispatch(loadProduct(Number(id))); };
+    refresh();
+    window.addEventListener('focus', refresh);
     setQuantity(1);
     setPhoto(undefined);
+    return () => window.removeEventListener('focus', refresh);
   }, [id, dispatch]);
   return (
     <>

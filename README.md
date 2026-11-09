@@ -113,6 +113,12 @@ All paths above are relative to `/api/v1`.
 
 ## Verification
 
+The catalog and product detail pages reload when opened and when their window
+regains focus. This revalidates the backend's public ETags after an administrator
+edit. Redux accepts only the latest catalog/detail request, preventing a slow
+older response from replacing fresh data. This uses normal HTTP revalidation;
+it does not require a WebSocket connection.
+
 ```powershell
 npm test
 npm run build

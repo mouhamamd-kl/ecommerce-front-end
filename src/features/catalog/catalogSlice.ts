@@ -33,6 +33,8 @@ interface CatalogState {
   layout: 'grid' | 'list';
   visibleCount: number;
   filtersOpen: boolean;
+  catalogRequestId: string | null;
+  detailRequestId: string | null;
 }
 const initialState: CatalogState = {
   products: [],
@@ -46,6 +48,8 @@ const initialState: CatalogState = {
   layout: 'grid',
   visibleCount: 12,
   filtersOpen: true,
+  catalogRequestId: null,
+  detailRequestId: null,
 };
 export const loadCatalog = createAsyncThunk<
   { products: Product[]; categories: Category[] },
@@ -102,28 +106,38 @@ const catalogSlice = createSlice({
     },
   },
   extraReducers(builder) {
-    builder.addCase(loadCatalog.pending, (state) => {
+    builder.addCase(loadCatalog.pending, (state, action) => {
+      state.catalogRequestId = action.meta.requestId;
       state.status = 'loading';
       state.error = null;
     });
     builder.addCase(loadCatalog.fulfilled, (state, action) => {
+      if (state.catalogRequestId !== action.meta.requestId) return;
+      state.catalogRequestId = null;
       state.status = 'succeeded';
       Object.assign(state, action.payload);
     });
     builder.addCase(loadCatalog.rejected, (state, action) => {
+      if (state.catalogRequestId !== action.meta.requestId) return;
+      state.catalogRequestId = null;
       state.status = 'failed';
       state.error = action.payload?.message || 'Unable to load products.';
     });
-    builder.addCase(loadProduct.pending, (state) => {
+    builder.addCase(loadProduct.pending, (state, action) => {
+      state.detailRequestId = action.meta.requestId;
       state.detailStatus = 'loading';
       state.selected = null;
       state.detailError = null;
     });
     builder.addCase(loadProduct.fulfilled, (state, action) => {
+      if (state.detailRequestId !== action.meta.requestId) return;
+      state.detailRequestId = null;
       state.detailStatus = 'succeeded';
       state.selected = action.payload;
     });
     builder.addCase(loadProduct.rejected, (state, action) => {
+      if (state.detailRequestId !== action.meta.requestId) return;
+      state.detailRequestId = null;
       state.detailStatus = 'failed';
       state.detailError = action.payload?.message || 'Unable to load this product.';
     });

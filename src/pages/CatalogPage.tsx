@@ -33,8 +33,11 @@ export default function CatalogPage() {
   const products = useAppSelector(selectFilteredProducts);
   const { add, busy } = useAddToCart();
   useEffect(() => {
-    if (catalog.status === 'idle') void dispatch(loadCatalog());
-  }, [catalog.status, dispatch]);
+    const refresh = () => { void dispatch(loadCatalog()); };
+    refresh();
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, [dispatch]);
   const count =
     catalog.filters.categoryIds.length +
     Number(!!catalog.filters.minPrice || !!catalog.filters.maxPrice) +
