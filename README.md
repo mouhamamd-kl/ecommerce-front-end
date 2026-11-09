@@ -7,9 +7,9 @@ filters and cards, fine borders, restrained typography, and blue primary actions
 ## Run locally
 
 ```powershell
-cd C:\Users\HP\Desktop\PersonalProjects\front_end\web\barakah-storefront
+cd .\ecommerce-front-end
 npm ci
-Copy-Item .env.example .env
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 npm run dev
 ```
 
